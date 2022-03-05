@@ -1,0 +1,210 @@
+# Lifsteal Skript - Custom by CrossPath
+
+# If you wish to edit "MAXIMUM HEART CAPACITY" please edit the number "20" in the "Death Event" category!
+# If you wish to disable ALT Prevention, please delete the entire category of "Alt Prevention Event"!
+
+# If you are an admin of a server and need support, please feel free to reach out to CrossPath via Twitter or other means of social media. All my accounts are labeled with the username of 'CrossPath' or 'CrossPath21'
+
+
+
+# Death Event
+on death of player:
+	if attacker is a player:
+		if the max health of attacker >= 20:
+			send "&8[&bLifesteal&8] &cYou killed %player%! You reached the maximum of 20 hearts, so you can not receive anymore hearts." to attacker
+			send "&8[&bLifesteal&8] &cYou were killed by %attacker%! You lost 1 heart!" to player
+			subtract 1 from max health of player
+			wait 2 ticks
+			if the max health of player <= 0.9:
+				make console execute command "gamemode spectator %player%"
+				send "&8[&bLifesteal&8] &cYou eliminated %player%" to attacker
+				broadcast "&8[&bLifesteal&8] &c%player% was ELIMINATED by %attacker%!"
+				wait 1 tick
+				ban player due to "&8[&bLifesteal&8] &cYou were ELIMINATED by %attacker%!"
+				kick player due to "&8[&bLifesteal&8] &cYou have been ELIMINATED by %attacker%!"
+		else:
+			send "&8[&bLifesteal&8] &cYou killed %player%! You gained 1 heart!" to attacker
+			send "&8[&bLifesteal&8] &cYou were killed by %attacker%! You lost 1 heart!" to player
+			add 1 to max health of attacker
+			subtract 1 from max health of player
+			wait 2 ticks
+			if the max health of player <= 0.9:
+				make console execute command "gamemode spectator %player%"
+				send "&8[&bLifesteal&8] &cYou eliminated %player%" to attacker
+				broadcast "&8[&bLifesteal&8] &c%player% was ELIMINATED by %attacker%!"
+				wait 1 tick
+				ban player due to "&8[&bLifesteal&8] &cYou were ELIMINATED by %attacker%!"
+				kick player due to "&8[&bLifesteal&8] &cYou have been ELIMINATED by %attacker%!"
+	else:
+		send "&8[&bLifesteal&8] &cYou were killed by a %attacker%! You lost 1 heart!" to player
+		subtract 1 from max health of player
+		wait 2 ticks
+		if the max health of player <= 0.9:
+			make console execute command "gamemode spectator %player%"
+			broadcast "&8[&bLifesteal&8] &c%player% was ELIMINATED by a %attacker%!"
+			wait 1 tick
+			ban player due to "&8[&bLifesteal&8] &cYou were ELIMINATED by a %attacker%!"
+			kick player due to "&8[&bLifesteal&8] &cYou have been ELIMINATED by a %attacker%!"
+
+
+
+# ALT Prevention Event (REMOVE IF YOU DO NOT WANT THIS OR IT CAUSES ISSUES ON THE SERVER!)
+on join:
+	if "%{ips::*}%" contains player's ip:
+		wait 1 tick
+		kick the player due to "&c[ALT PREVENTION] &eSorry, you can't play right now! There is someone else already on your current ip address!"
+	else:
+		add player's ip to {ips::*}
+		set {checkip.%player%} to true
+ 
+on quit:
+	if {checkip.%player%} is true:
+		remove player's ip from {ips::*}
+		set {checkip.%player%} to false
+
+
+
+# Commands
+command /transfer [<player>] [<integer>]:
+	aliases: /giveheart, /transferheart, /hearttransfer, /givehealth, /transferhealth, /healthtransfer, /th
+	permission: lifesteal.cmd.transfer
+	permission message: &8[&bLifesteal&8] &cSorry! You do not have permission to this command.
+	executable by: players
+	usage: &cCorrect Usage: /transfer (player) (number)
+	description: Removes health from yourself and gives it to someone else.
+	trigger:
+		if arg-1 is set:
+			if arg-2 is set:
+				if arg-2 is not less than 1:
+					if player's max health is more than arg-2:
+						add arg-2 to the arg-1's max health
+						subtract arg-2 from the player's max health
+						send "&8[&bLifesteal&8] &aSuccess! You transferred %arg-2% heart(s) to %arg-1%!"
+						send "&8[&bLifesteal&8] &aYou received %arg-2% heart(s) from %player%!" to arg-1
+					else:
+						send "&8[&bLifesteal&8] &cYou do not have enough hearts to share!"
+				else:
+					send "&8[&bLifesteal&8] &cYou can't get health that easy. Sorry, not sorry."
+			else:
+				if player's max health is more than 1:
+					add 1 to the arg-1's max health
+					subtract 1 from the player's max health
+					send "&8[&bLifesteal&8] &aSuccess! You transferred 1 heart to %arg-1%!"
+					send "&8[&bLifesteal&8] &aYou received 1 heart from %player%!" to arg-1
+		else:
+			send "&cYou need to mention a player to share your hearts with!"
+
+command /sethealth [<player>] [<integer>]:
+	aliases: /setheart, /heartset, /healthset, /sh
+	permission: lifesteal.cmd.set
+	permission message: &8[&bLifesteal&8] &cSorry! You do not have permission to this command.
+	usage: &cCorrect Usage: /sethealth (player) (number)
+	description: Forcibly sets the player's health to an exact integer.
+	trigger:
+		if arg-1 is set:
+			if arg-2 is set:
+				if arg-2 is not less than 1:
+					set max health of arg-1 to arg-2
+					send "&8[&bLifesteal&8] &aSuccess! You set %arg-1%'s health to %arg-2%!"
+					send "&8[&bLifesteal&8] &aYour health has been set to %arg-2% by %player%!" to arg-1
+				else:
+					send "&8[&bLifesteal&8] &cYou can't set their health to a value less than 1!"
+			else:
+				send "&8[&bLifesteal&8] &cYou must specify a value of hearts to give them!"
+		else:
+			send "&8[&bLifesteal&8] &cYou need to mention a player to set their health."
+
+command /removehealth [<player>] [<integer>]:
+	aliases: /removeheart, /subtractheart, /heartremove, /heartsubtract, /subtracthealth, /healthremove, /rh
+	permission: lifesteal.cmd.remove
+	permission message: &8[&bLifesteal&8] &cSorry! You do not have permission to this command.
+	usage: &cCorrect Usage: /removehealth (player) (number)
+	description: Forcibly removes a number of hearts from the player.
+	trigger:
+		if arg-1 is set:
+			if arg-2 is set:
+				subtract arg-2 from the arg-1's max health
+				send "&8[&bLifesteal&8] &aSuccess! You removed %arg-2% heart(s) from %arg-1%."
+				send "&8[&bLifesteal&8] &aYou lost %arg-2% heart(s) from %player% (ADMIN)." to arg-1
+			else:
+				subtract 1 from the arg-1's max health
+				send "&8[&bLifesteal&8] &aSuccess! You removed 1 heart from %arg-1%."
+				send "&8[&bLifesteal&8] &aYou lost 1 heart from %player% (ADMIN)." to arg-1
+		else:
+			send "&8[&bLifesteal&8] &cYou need to mention a player to remove their hearts!"
+
+command /addhealth [<player>] [<integer>]:
+	aliases: /addheart, /newheart, /heartadd, /heartnew, /healthadd, /healthnew, /ah
+	permission: lifesteal.cmd.add
+	permission message: &8[&bLifesteal&8] &cSorry! You do not have permission to this command.
+	usage: &cCorrect Usage: /addhealth (player) (number)
+	description: Forcibly adds a number of hearts to a player.
+	trigger:
+		if arg-1 is set:
+			if arg-2 is set:
+				add arg-2 to the arg-1's max health
+				send "&8[&bLifesteal&8] &aSuccess! You added %arg-2% heart(s) to %arg-1%."
+				send "&8[&bLifesteal&8] &aYou gained %arg-2% heart(s) from %player% (ADMIN)." to arg-1
+			else:
+				add 1 to the arg-1's max health
+				send "&8[&bLifesteal&8] &aSuccess! You added 1 heart to %arg-1%."
+				send "&8[&bLifesteal&8] &aYou gained 1 heart from %player% (ADMIN)." to arg-1
+		else:
+			send "&8[&bLifesteal&8] &cYou need to mention a player to give them hearts!"
+
+command /viewhealth [<offlineplayer>]:
+	aliases: /viewheart, /heartview, /healthview, /vh
+	permission: lifesteal.cmd.view
+	permission message: &8[&bLifesteal&8] &cSorry! You do not have permission to this command.
+	usage: &cCorrect Usage: /viewhealth (player)
+	description: View the maximum number of hearts a player has.
+	trigger:
+		if arg-1 is set:
+			send "&8[&bLifesteal&8] &9%arg-1% currently has a maximum of &c%max health of arg-1% hearts&9!"
+		else:
+			send "&8[&bLifesteal&8] &9You currently have &c%max health of player% hearts&9!"
+
+command /lifesteal:
+	aliases: /life, /steal, /lifehelp, /lh, /hl, /lsteal, /lifes, /lifest, /listeal, /lifecmds, /stealcmds, /lifehelpcmds, /lhc, /hlc, /lstealcmds, /lifescmds, /lifestcmds, /listealcmds
+	permission: lifesteal.cmd.help
+	permission message: &8[&bLifesteal&8] &cSorry! You do not have permission to this command.
+	description: The main help command for the Lifesteal Skript.
+	trigger:
+		send "&bHeart Skript by CrossPath"
+		send "&6/transfer (player) (number) &7- &fRemoves health from yourself and gives it to someone else."
+		send "&6/sethealth (player) (number) &7- &fForcibly sets the player's health to an exact integer."
+		send "&6/removehealth (player) (number) &7- &fForcibly removes a number of hearts from the player."
+		send "&6/addhealth (player) (number) &7- &fForcibly adds a number of hearts to a player."
+		send "&6/viewhealth (player) &7- &fView the maximum number of hearts a player has."
+
+command /lsnodes:
+	aliases: /lifenodes, /stealnodes, /lifehelpnodes, /lhn, /hln, /lstealnodes, /lifesnodes, /lifestnodes, /listealnodes
+	permission: lifesteal.cmd.help.nodes
+	permission message: &8[&bLifesteal&8] &cSorry! You do not have permission to this command.
+	description: The main help command for the Lifesteal Skript.
+	trigger:
+		send "&bHeart Skript by CrossPath"
+		send "&6/transfer &7- &clifesteal.cmd.transfer"
+		send "&6/sethealth &7- &clifesteal.cmd.set"
+		send "&6/removehealth &7- &clifesteal.cmd.remove"
+		send "&6/addhealth &7- &clifesteal.cmd.add"
+		send "&6/viewhealth &7- &clifesteal.cmd.view"
+		send "&6/lifesteal &7- &clifesteal.cmd.help"
+		send "&6/lsnodes &7- &clifesteal.cmd.help.nodes"
+		send "&6/lsaliases &7- &clifesteal.cmd.help.aliases"
+
+command /lsaliases:
+	aliases: /lifealiases, /stealaliases, /lifehelpaliases, /lha, /hla, /lstealaliases, /lifesaliases, /lifestaliases, /listealaliases
+	permission: lifesteal.cmd.help.aliases
+	permission message: &8[&bLifesteal&8] &cSorry! You do not have permission to this command.
+	description: The main help command for the Lifesteal Skript.
+	trigger:
+		send "&bHeart Skript by CrossPath"
+		send "&6/transfer &7- &d/giveheart, /transferheart, /hearttransfer, /givehealth, /transferhealth, /healthtransfer, /th"
+		send "&6/sethealth &7- &d/setheart, /heartset, /healthset, /sh"
+		send "&6/removehealth &7- &d/removeheart, /subtractheart, /heartremove, /heartsubtract, /subtracthealth, /healthremove, /rh"
+		send "&6/addhealth &7- &d/addheart, /newheart, /heartadd, /heartnew, /healthadd, /healthnew, /ah"
+		send "&6/viewhealth &7- &d/viewheart, /heartview, /healthview, /vh"
+		send "&6/lifesteal &7- &d/life, /steal, /lifehelp, /lh, /hl, /help life, /lsteal, /lifes, /crosspath skript, /lifest, /listeal"
+		send "&6/lsnodes &7- &d/lifenodes, /stealnodes, /lifehelpnodes, /lhn, /hln, /lstealnodes, /lifesnodes, /lifestnodes, /listealnodes"
+		send "&6/lsaliases &7- &d/lifealiases, /stealaliases, /lifehelpaliases, /lha, /hla, /lstealaliases, /lifesaliases, /lifestaliases, /listealaliases"

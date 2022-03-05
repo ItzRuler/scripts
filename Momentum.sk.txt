@@ -1,0 +1,69 @@
+﻿import:
+	org.bukkit.event.player.PlayerAdvancementDoneEvent
+
+on load:
+	load yaml "plugins\XAchievement\data\achievementsdata.yml" as "data"
+	
+on unload:
+	unload "data"
+
+on PlayerAdvancementDoneEvent:
+	if yaml value "data.%event.getPlayer()%.max" from "data" doesn't exist:
+		set yaml value "data.%event.getPlayer()%.max" from "data" to 1
+		set {_x} to 1 / 90 + 0.20
+		set the event.getPlayer()'s walk speed to {_x}
+	else:
+		set {_x} to yaml value "data.%event.getPlayer()%.max" from "data"
+		set yaml value "data.%event.getPlayer()%.max" from "data" to {_x} + 1
+		set {_x} to {_x} + 1 / 90 + 0.20
+		set the event.getPlayer()'s walk speed to {_x}
+	save yaml "data"
+	send "&aYou gained achievement and your speed increased." to event.getPlayer()
+	
+command /speedsettings [<integer>]:
+	trigger:
+		if arg-1 is set:
+			if yaml value "data.%player%.max" from "data" exists:
+				set {_x} to yaml value "data.%player%.max" from "data"
+				if {_x} is greater than or equal to arg-1:
+					if arg-1 is not 1:
+						set {_y} to arg 1 / 90 + 0.20
+						set the player's walk speed to {_y}
+						send "&aYour speed is set to &e%arg-1%"
+					else:
+						set the player's walk speed to 0.20
+						send "&aYour speed is set to &e%arg-1%"
+
+				else:
+					send "&cMaximum speed: &6%{_x}%"
+			else:
+				send "&cYou can't speed up, your level is 1"
+		else:
+			send "&cSpeed error!"
+			
+command /setspeed [<player>] [<integer>]:
+	permission: skript.setspeed
+	permission message: &cDoesn't have permission!
+	trigger:
+		if arg-1 is set:
+			if arg-2 is set:
+				if yaml value "data.%arg-1%.max" from "data" exists:
+					set {_x} to yaml value "data.%arg-1%.max" from "data"
+					if {_x} is greater than or equal to arg-1:
+						if arg-2 is not 1:
+							set {_y} to arg 2 / 90 + 0.20
+							set the player's walk speed to {_y}
+							send "&aThe speed of the &e%arg-1% &ais set to &e%arg-2%&a."
+						else:
+							set the player's walk speed to 0.20
+							send "&aThe speed of the &e%arg-1% &ais set to &e%arg-2%&a."
+
+					else:
+						send "&cMaximum speed: &6%{_x}%"
+				else:
+					send "&cYou can't speed up, &6%arg-1%'s &clevel is 1"
+			else:
+				send "&cSpeed error!"			
+		else:
+			send "&cPlayer error!"			
+			
